@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OMS Command — DG Food Bangladesh</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#070C18;--bg2:#0B1220;--bg3:#0F1830;--bg4:#131E38;
+  --surface:#111827;--surface2:#1A2540;--surface3:#1F2D4A;
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.1);--border3:rgba(255,255,255,.15);
+  --cyan:#00D4FF;--cyan2:#00AECF;--cyan3:rgba(0,212,255,.12);
+  --green:#00E676;--green2:#00C853;--greenbg:rgba(0,230,118,.1);
+  --amber:#FFB300;--amber2:#FF8F00;--amberbg:rgba(255,179,0,.1);
+  --red:#FF5252;--red2:#E53935;--redbg:rgba(255,82,82,.1);
+  --purple:#CE93D8;--purplebg:rgba(206,147,216,.1);
+  --teal:#4DD0E1;--tealbg:rgba(77,208,225,.1);
+  --text:#F0F4FF;--text2:#8B9DBF;--text3:#4A5D7A;--text4:#2A3A55;
+  --font:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;
+  --r:10px;--r2:14px;--r3:20px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;overflow:hidden}
+
+/* ── LAYOUT ── */
+.app{display:grid;grid-template-rows:52px 1fr;height:100vh}
+.body{display:grid;grid-template-columns:220px 1fr;overflow:hidden}
+
+/* ── TOPBAR ── */
+.topbar{
+  background:rgba(7,12,24,.95);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+  backdrop-filter:blur(20px);
+  position:relative;z-index:100;
+}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.3}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-icon{width:28px;height:28px;background:linear-gradient(135deg,var(--cyan),#0066FF);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;color:#000;letter-spacing:-.5px}
+.brand-name{font-weight:800;font-size:15px;letter-spacing:-.3px}
+.brand-name span{color:var(--cyan)}
+.brand-tag{font-size:10px;color:var(--text3);font-weight:400}
+.topbar-center{display:flex;align-items:center;gap:6px}
+.tab-btn{
+  padding:5px 14px;border-radius:6px;font-size:11px;font-weight:600;
+  background:transparent;border:1px solid transparent;color:var(--text3);
+  cursor:pointer;transition:all .15s;font-family:var(--font);
+}
+.tab-btn:hover{color:var(--text2);border-color:var(--border2)}
+.tab-btn.active{background:var(--surface2);color:var(--cyan);border-color:rgba(0,212,255,.2)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.live-chip{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:600;color:var(--green);background:var(--greenbg);border:1px solid rgba(0,230,118,.2);padding:4px 10px;border-radius:20px}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.alert-btn{position:relative;background:transparent;border:none;cursor:pointer;padding:4px;color:var(--text2)}
+.alert-badge{position:absolute;top:-2px;right:-2px;background:var(--red);color:#fff;font-size:8px;font-weight:700;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font)}
+.avatar{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--cyan2),#0044BB);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;cursor:pointer;color:#000}
+.time-badge{font-family:var(--mono);font-size:10px;color:var(--text3);background:var(--surface);border:1px solid var(--border);padding:4px 9px;border-radius:6px}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  padding:12px 0;overflow-y:auto;
+}
+.sidebar::-webkit-scrollbar{width:0}
+.nav-group-label{
+  font-size:9px;font-weight:700;letter-spacing:1.5px;
+  color:var(--text4);padding:12px 16px 6px;text-transform:uppercase;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 16px;cursor:pointer;
+  color:var(--text3);font-size:12px;font-weight:500;
+  transition:all .15s;border-left:2px solid transparent;
+  position:relative;
+}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.nav-item.active{
+  color:var(--cyan);background:linear-gradient(90deg,rgba(0,212,255,.06),transparent);
+  border-left-color:var(--cyan);
+}
+.nav-icon{width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--redbg);color:var(--red);border:1px solid rgba(255,82,82,.2);font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px}
+.nav-badge.green{background:var(--greenbg);color:var(--green);border-color:rgba(0,230,118,.2)}
+.sidebar-footer{margin-top:auto;padding:12px 16px;border-top:1px solid var(--border)}
+.sys-status{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--text3)}
+.status-dot{width:6px;height:6px;border-radius:50%}
+
+/* ── CONTENT ── */
+.content{overflow-y:auto;background:var(--bg);padding:0}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
+
+/* ── VIEW ── */
+.view{display:none;padding:20px;animation:fadeIn .2s ease}
+.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.page-title{font-size:20px;font-weight:800;letter-spacing:-.3px}
+.page-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.page-actions{display:flex;gap:8px}
+
+/* ── BUTTONS ── */
+.btn{padding:7px 16px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .15s;display:flex;align-items:center;gap:6px}
+.btn-primary{background:var(--cyan);color:#000;border:none}
+.btn-primary:hover{background:var(--cyan2);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{border-color:var(--border3);color:var(--text)}
+.btn-danger{background:var(--redbg);color:var(--red);border:1px solid rgba(255,82,82,.2)}
+.btn-success{background:var(--greenbg);color:var(--green);border:1px solid rgba(0,230,118,.2)}
+.btn-sm{padding:4px 10px;font-size:10px}
+
+/* ── KPI CARDS ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);
+  padding:16px;position:relative;overflow:hidden;cursor:pointer;transition:all .2s;
+}
+.kpi:hover{border-color:var(--border2);transform:translateY(-1px)}
+.kpi::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;border-radius:50%;opacity:.06;pointer-events:none}
+.kpi.c1::before{background:var(--cyan)} .kpi.c2::before{background:var(--green)}
+.kpi.c3::before{background:var(--amber)} .kpi.c4::before{background:var(--red)}
+.kpi-label{font-size:10px;font-weight:600;letter-spacing:.8px;color:var(--text3);text-transform:uppercase;margin-bottom:8px}
+.kpi-val{font-size:26px;font-weight:800;line-height:1;letter-spacing:-.5px}
+.kpi.c1 .kpi-val{color:var(--cyan)} .kpi.c2 .kpi-val{color:var(--green)}
+.kpi.c3 .kpi-val{color:var(--amber)} .kpi.c4 .kpi-val{color:var(--red)}
+.kpi-change{font-size:11px;margin-top:6px;display:flex;align-items:center;gap:4px;color:var(--text3)}
+.up{color:var(--green)} .dn{color:var(--red)}
+.kpi-spark{display:flex;align-items:flex-end;gap:2px;height:24px;margin-top:8px}
+.spark-b{border-radius:2px 2px 0 0;flex:1;min-width:4px;transition:height .3s}
+
+/* ── PANELS ── */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:16px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.panel-title{font-size:13px;font-weight:700;letter-spacing:-.2px}
+.panel-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.grid-2{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-bottom:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px}
+
+/* ── TAGS / PILLS ── */
+.pill{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;display:inline-flex;align-items:center;gap:4px}
+.pill-cyan{background:var(--cyan3);color:var(--cyan);border:1px solid rgba(0,212,255,.2)}
+.pill-green{background:var(--greenbg);color:var(--green);border:1px solid rgba(0,230,118,.2)}
+.pill-red{background:var(--redbg);color:var(--red);border:1px solid rgba(255,82,82,.2)}
+.pill-amber{background:var(--amberbg);color:var(--amber);border:1px solid rgba(255,179,0,.2)}
+.pill-purple{background:var(--purplebg);color:var(--purple);border:1px solid rgba(206,147,216,.2)}
+.pill-teal{background:var(--tealbg);color:var(--teal);border:1px solid rgba(77,208,225,.2)}
+
+/* ── TABLE ── */
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--text3);text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--border);text-align:left}
+.data-table td{padding:9px 10px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--text2);vertical-align:middle}
+.data-table tr:hover td{background:rgba(255,255,255,.02)}
+.data-table td:first-child{color:var(--text);font-weight:500}
+.data-table tr:last-child td{border-bottom:none}
+
+/* ── SEARCH / FILTER BAR ── */
+.filter-bar{display:flex;gap:8px;margin-bottom:14px;align-items:center}
+.search-wrap{position:relative;flex:1}
+.search-wrap input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 10px 7px 32px;border-radius:8px;font-size:11px;font-family:var(--font);outline:none;transition:border-color .15s}
+.search-wrap input:focus{border-color:rgba(0,212,255,.3)}
+.search-wrap input::placeholder{color:var(--text3)}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:12px}
+.filter-select{background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:7px 10px;border-radius:8px;font-size:11px;font-family:var(--font);outline:none;cursor:pointer}
+.filter-select:focus{border-color:rgba(0,212,255,.3)}
+
+/* ── FORM ELEMENTS ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.form-grid.cols3{grid-template-columns:1fr 1fr 1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.5px;text-transform:uppercase}
+.form-input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:12px;font-family:var(--font);outline:none;transition:all .15s;width:100%}
+.form-input:focus{border-color:rgba(0,212,255,.4);background:var(--surface3)}
+.form-input::placeholder{color:var(--text3)}
+.form-select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:12px;font-family:var(--font);outline:none;cursor:pointer;width:100%}
+.form-select:focus{border-color:rgba(0,212,255,.4)}
+textarea.form-input{resize:vertical;min-height:80px}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r3);padding:24px;width:520px;max-width:95vw;max-height:85vh;overflow-y:auto;transform:translateY(10px) scale(.98);transition:transform .25s;box-shadow:0 40px 80px rgba(0,0,0,.6)}
+.modal-overlay.open .modal{transform:translateY(0) scale(1)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-title{font-size:16px;font-weight:700}
+.modal-close{background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:2px 6px;border-radius:4px;transition:color .15s}
+.modal-close:hover{color:var(--text)}
+.modal-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+
+/* ── TOAST ── */
+.toast-wrap{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:9999}
+.toast{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:10px;padding:12px 16px;font-size:12px;
+  display:flex;align-items:center;gap:10px;min-width:260px;
+  animation:slideIn .3s ease;box-shadow:0 8px 32px rgba(0,0,0,.4);
+}
+@keyframes slideIn{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
+.toast.success{border-color:rgba(0,230,118,.3)} .toast-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── LIVE TICKER ── */
+.ticker-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:11px}
+.ticker-row:last-child{border-bottom:none}
+.ticker-time{font-family:var(--mono);font-size:9px;color:var(--text3);min-width:40px;flex-shrink:0}
+.ticker-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.ticker-msg{flex:1;color:var(--text2)}
+.ticker-val{color:var(--text3);font-family:var(--mono);font-size:10px}
+
+/* ── FRAUD ITEM ── */
+.fraud-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.fraud-row:last-child{border-bottom:none}
+.fraud-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.fraud-body{flex:1;min-width:0}
+.fraud-name{font-size:12px;font-weight:600;color:var(--text)}
+.fraud-meta{font-size:10px;color:var(--text3);margin-top:1px}
+.risk-track{height:3px;background:var(--bg4);border-radius:2px;margin-top:5px;overflow:hidden}
+.risk-fill{height:100%;border-radius:2px}
+
+/* ── DISTRICT HEAT MAP ── */
+.heat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.heat-cell{border-radius:8px;padding:8px 6px;text-align:center;cursor:pointer;transition:all .2s;border:1px solid transparent;position:relative;overflow:hidden}
+.heat-cell:hover{border-color:var(--cyan);transform:scale(1.04)}
+.heat-name{font-size:8px;color:var(--text2);margin-bottom:3px;font-weight:600}
+.heat-val{font-size:13px;font-weight:800;font-family:var(--mono)}
+
+/* ── CHART AREA ── */
+.chart-wrap{position:relative;width:100%}
+canvas{display:block}
+
+/* ── AI PREDICTION ── */
+.pred-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.pred-row:last-child{border-bottom:none}
+.pred-label{width:90px;font-size:11px;color:var(--text2);flex-shrink:0}
+.pred-track{flex:1;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.pred-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.pred-val{width:36px;text-align:right;font-size:11px;font-family:var(--mono);font-weight:600}
+
+/* ── FACE AUTH ── */
+.face-trio{display:flex;gap:10px;margin-bottom:14px}
+.face-stat{flex:1;background:var(--surface2);border-radius:10px;padding:12px;text-align:center;border:1px solid var(--border)}
+.face-num{font-size:22px;font-weight:800;font-family:var(--mono);line-height:1}
+.face-lbl{font-size:9px;color:var(--text3);margin-top:3px;font-weight:600;letter-spacing:.5px}
+
+/* ── DONUT ── */
+.donut-layout{display:flex;align-items:center;gap:16px}
+.donut-wrap{position:relative;width:80px;height:80px;flex-shrink:0}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-pct{font-size:17px;font-weight:800;font-family:var(--mono)}
+.donut-sub{font-size:9px;color:var(--text3)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;padding:3px 0}
+.leg-sq{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* ── BADGE STATUS ── */
+.status{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px}
+.status::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.8}
+.s-active{background:var(--greenbg);color:var(--green)}
+.s-pending{background:var(--amberbg);color:var(--amber)}
+.s-suspended{background:var(--redbg);color:var(--red)}
+.s-renewal{background:var(--purplebg);color:var(--purple)}
+
+/* ── TABS IN PANEL ── */
+.inner-tabs{display:flex;gap:2px;background:var(--bg);border-radius:8px;padding:3px;margin-bottom:14px}
+.inner-tab{padding:5px 14px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;color:var(--text3);transition:all .15s;border:1px solid transparent}
+.inner-tab.active{background:var(--surface2);color:var(--cyan);border-color:rgba(0,212,255,.15)}
+.inner-view{display:none}
+.inner-view.active{display:block}
+
+/* ── NOTIFICATION PANEL ── */
+.notif-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.notif-item:last-child{border-bottom:none}
+.notif-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.notif-body{flex:1}
+.notif-title{font-size:11px;font-weight:600;color:var(--text)}
+.notif-meta{font-size:10px;color:var(--text3);margin-top:1px}
+.notif-time{font-size:9px;color:var(--text4);font-family:var(--mono)}
+
+/* ── STEP WIZARD ── */
+.wizard-steps{display:flex;gap:0;margin-bottom:20px}
+.wizard-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+.wizard-step::after{content:'';position:absolute;left:50%;top:14px;width:100%;height:1px;background:var(--border2)}
+.wizard-step:last-child::after{display:none}
+.step-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;z-index:1;position:relative;transition:all .2s}
+.step-circle.done{background:var(--green);color:#000} .step-circle.active-s{background:var(--cyan);color:#000}
+.step-circle.todo{background:var(--bg4);color:var(--text3);border:1px solid var(--border2)}
+.step-label{font-size:9px;color:var(--text3);text-align:center;font-weight:600}
+
+/* ── EMPTY STATE ── */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;color:var(--text3);gap:8px}
+.empty-icon{font-size:32px;opacity:.4}
+.empty-text{font-size:12px}
+
+/* ── SCROLLBAR ── */
+.panel::-webkit-scrollbar{width:3px}
+.panel::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
+
+/* ── INLINE CHART OVERRIDES ── */
+.chart-wrap-h{position:relative}
+
+/* ── USER MGMT ── */
+.user-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px;display:flex;align-items:center;gap:12px;transition:all .15s;cursor:pointer}
+.user-card:hover{border-color:var(--border2)}
+.user-avatar{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.user-name{font-size:12px;font-weight:600;color:var(--text)}
+.user-role{font-size:10px;color:var(--text3);margin-top:1px}
+.user-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+
+/* ── MAPS PLACEHOLDER ── */
+.map-placeholder{background:var(--surface2);border-radius:var(--r);height:180px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border:1px solid var(--border)}
+.map-placeholder::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.01) 0,rgba(255,255,255,.01) 1px,transparent 1px,transparent 40px),repeating-linear-gradient(90deg,rgba(255,255,255,.01) 0,rgba(255,255,255,.01) 1px,transparent 1px,transparent 40px)}
+.map-pin{position:absolute;width:8px;height:8px;border-radius:50%;cursor:pointer;transition:transform .2s}
+.map-pin:hover{transform:scale(1.8)}
+.map-pin::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1px solid currentColor;opacity:.4;animation:ripple 2s infinite}
+@keyframes ripple{0%{transform:scale(1);opacity:.4}100%{transform:scale(2.5);opacity:0}}
+
+/* ── SETTINGS ── */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.setting-row:last-child{border-bottom:none}
+.setting-info .s-label{font-size:12px;font-weight:600;color:var(--text)}
+.setting-info .s-desc{font-size:10px;color:var(--text3);margin-top:2px}
+.toggle{width:36px;height:20px;background:var(--bg4);border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--cyan)}
+.toggle-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle.on .toggle-thumb{transform:translateX(16px)}
+
+/* ── ANIMATIONS ── */
+@keyframes countUp{from{opacity:0}to{opacity:1}}
+.num-anim{animation:countUp .5s ease}
+
+/* ── SCROLLABLE TABLE CONTAINER ── */
+.table-scroll{overflow-x:auto}
+.table-scroll::-webkit-scrollbar{height:3px}
+.table-scroll::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">OMS</div>
+    <div>
+      <div class="brand-name">OMS<span>Command</span></div>
+      <div class="brand-tag">DG Food Bangladesh</div>
+    </div>
+  </div>
+  <div class="topbar-center">
+    <button class="tab-btn active" onclick="switchView('dashboard',this)">Dashboard</button>
+    <button class="tab-btn" onclick="switchView('dealers',this)">Dealers</button>
+    <button class="tab-btn" onclick="switchView('distribution',this)">Distribution</button>
+    <button class="tab-btn" onclick="switchView('fraud',this)">Fraud</button>
+    <button class="tab-btn" onclick="switchView('analytics',this)">Analytics</button>
+    <button class="tab-btn" onclick="switchView('users',this)">Users</button>
+    <button class="tab-btn" onclick="switchView('settings',this)">Settings</button>
+  </div>
+  <div class="topbar-right">
+    <div class="time-badge" id="clock">--:--:--</div>
+    <div class="live-chip"><div class="pulse"></div>Live</div>
+    <button class="alert-btn" onclick="switchView('fraud',document.querySelectorAll(\'.tab-btn\')[3])">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <div class="alert-badge">3</div>
+    </button>
+    <div class="avatar" title="Super Admin">SA</div>
+  </div>
+</div>
+
+<div class="body">
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="nav-group-label">Main</div>
+  <div class="nav-item active" onclick="switchView('dashboard',document.querySelectorAll('.tab-btn')[0]);setActive(this)">
+    <div class="nav-icon">⬡</div>Dashboard
+  </div>
+  <div class="nav-item" onclick="switchView('dealers',document.querySelectorAll('.tab-btn')[1]);setActive(this)">
+    <div class="nav-icon">◈</div>Dealer Registry<div class="nav-badge green">1847</div>
+  </div>
+  <div class="nav-item" onclick="switchView('distribution',document.querySelectorAll('.tab-btn')[2]);setActive(this)">
+    <div class="nav-icon">⊕</div>Distribution
+  </div>
+  <div class="nav-item" onclick="switchView('fraud',document.querySelectorAll('.tab-btn')[3]);setActive(this)">
+    <div class="nav-icon">⚠</div>Fraud Alerts<div class="nav-badge">3</div>
+  </div>
+  <div class="nav-item" onclick="switchView('analytics',document.querySelectorAll('.tab-btn')[4]);setActive(this)">
+    <div class="nav-icon">◎</div>AI Analytics
+  </div>
+  <div class="nav-group-label">Operations</div>
+  <div class="nav-item" onclick="switchView('users',document.querySelectorAll('.tab-btn')[5]);setActive(this)">
+    <div class="nav-icon">⊞</div>User Management
+  </div>
+  <div class="nav-item" onclick="openModal('addDealer')">
+    <div class="nav-icon">＋</div>Register Dealer
+  </div>
+  <div class="nav-item" onclick="openModal('allotment')">
+    <div class="nav-icon">≡</div>Create Allotment
+  </div>
+  <div class="nav-item" onclick="openModal('doOrder')">
+    <div class="nav-icon">▣</div>Generate DO
+  </div>
+  <div class="nav-group-label">System</div>
+  <div class="nav-item" onclick="switchView('settings',document.querySelectorAll('.tab-btn')[6]);setActive(this)">
+    <div class="nav-icon">⚙</div>Settings
+  </div>
+  <div class="nav-item" onclick="showToast('Audit log exported successfully','success')">
+    <div class="nav-icon">↗</div>Export Audit Log
+  </div>
+  <div class="sidebar-footer">
+    <div class="sys-status">
+      <div class="status-dot" style="background:var(--green)"></div>
+      All systems operational
+    </div>
+    <div style="font-size:9px;color:var(--text4);margin-top:4px">v1.0.0 · Build 2025.03</div>
+  </div>
+</div>
+
+<!-- CONTENT AREA -->
+<div class="content">
+
+<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<div class="view active" id="view-dashboard">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Command Center</div>
+      <div class="page-sub">Real-time overview · Updated every 30 seconds</div>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-ghost btn-sm" onclick="showToast('Dashboard refreshed','success')">↺ Refresh</button>
+      <button class="btn btn-primary btn-sm" onclick="openModal('addDealer')">＋ New Dealer</button>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi c1" onclick="switchView('distribution',document.querySelectorAll('.tab-btn')[2])">
+      <div class="kpi-label">Today's Distributions</div>
+      <div class="kpi-val" id="k1">2,14,382</div>
+      <div class="kpi-change"><span class="up">↑ 4.2%</span>&nbsp;vs yesterday</div>
+      <div class="kpi-spark" id="spark1"></div>
+    </div>
+    <div class="kpi c2" onclick="switchView('dealers',document.querySelectorAll('.tab-btn')[1])">
+      <div class="kpi-label">Active Dealers</div>
+      <div class="kpi-val" id="k2">1,847</div>
+      <div class="kpi-change"><span class="up">↑ 12</span>&nbsp;new today</div>
+      <div class="kpi-spark" id="spark2"></div>
+    </div>
+    <div class="kpi c3">
+      <div class="kpi-label">Pending Approvals</div>
+      <div class="kpi-val" id="k3">234</div>
+      <div class="kpi-change"><span class="dn">↑ 18</span>&nbsp;in queue</div>
+      <div class="kpi-spark" id="spark3"></div>
+    </div>
+    <div class="kpi c4" onclick="switchView('fraud',document.querySelectorAll('.tab-btn')[3])">
+      <div class="kpi-label">Fraud Alerts</div>
+      <div class="kpi-val" id="k4">3</div>
+      <div class="kpi-change"><span class="dn">↑ 2</span>&nbsp;flagged today</div>
+      <div class="kpi-spark" id="spark4"></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Distribution Chart -->
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Distribution Volume — 14 Days</div>
+          <div class="panel-sub">Beneficiaries served across all divisions</div>
+        </div>
+        <div class="pill pill-green">+8.3% MoM</div>
+      </div>
+      <div class="chart-wrap" style="height:150px"><canvas id="distChart"></canvas></div>
+    </div>
+
+    <!-- Face Auth -->
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Face Auth — Today</div>
+          <div class="panel-sub">AI biometric verification status</div>
+        </div>
+        <div class="pill pill-cyan">AI Powered</div>
+      </div>
+      <div class="face-trio">
+        <div class="face-stat" style="border-color:rgba(0,230,118,.2)">
+          <div class="face-num" style="color:var(--green)">98.4%</div>
+          <div class="face-lbl">Accuracy</div>
+        </div>
+        <div class="face-stat" style="border-color:rgba(0,212,255,.2)">
+          <div class="face-num" style="color:var(--cyan)">1.2s</div>
+          <div class="face-lbl">Avg Verify</div>
+        </div>
+        <div class="face-stat" style="border-color:rgba(255,82,82,.2)">
+          <div class="face-num" style="color:var(--red)">312</div>
+          <div class="face-lbl">Rejected</div>
+        </div>
+      </div>
+      <div class="donut-layout">
+        <div class="donut-wrap">
+          <svg viewBox="0 0 80 80" width="80" height="80">
+            <circle cx="40" cy="40" r="30" fill="none" stroke="var(--surface2)" stroke-width="10"/>
+            <circle cx="40" cy="40" r="30" fill="none" stroke="var(--green)" stroke-width="10" stroke-dasharray="168 20" stroke-linecap="round" transform="rotate(-90 40 40)"/>
+            <circle cx="40" cy="40" r="30" fill="none" stroke="var(--red)" stroke-width="10" stroke-dasharray="12 176" stroke-dashoffset="-168" stroke-linecap="round" transform="rotate(-90 40 40)"/>
+          </svg>
+          <div class="donut-center"><div class="donut-pct" style="color:var(--green)">89%</div><div class="donut-sub">Success</div></div>
+        </div>
+        <div style="flex:1">
+          <div class="legend-item"><div class="leg-sq" style="background:var(--green)"></div><span style="color:var(--text2)">Verified</span><span style="margin-left:auto;color:var(--green);font-weight:700;font-family:var(--mono)">1,90,821</span></div>
+          <div class="legend-item"><div class="leg-sq" style="background:var(--red)"></div><span style="color:var(--text2)">Rejected</span><span style="margin-left:auto;color:var(--red);font-weight:700;font-family:var(--mono)">23,561</span></div>
+          <div class="legend-item"><div class="leg-sq" style="background:var(--amber)"></div><span style="color:var(--text2)">Pending</span><span style="margin-left:auto;color:var(--amber);font-weight:700;font-family:var(--mono)">0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <!-- Division Heatmap -->
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">Division Activity</div><div class="pill pill-cyan">Live</div></div>
+      <div class="heat-grid" id="divisionMap"></div>
+    </div>
+
+    <!-- Fraud Alerts -->
+    <div class="panel">
+      <div class="panel-head">
+        <div><div class="panel-title">Active Fraud Alerts</div><div class="panel-sub">AI-detected anomalies</div></div>
+        <div class="pill pill-red">3 Active</div>
+      </div>
+      <div class="fraud-row">
+        <div class="fraud-icon" style="background:var(--redbg)">⚠</div>
+        <div class="fraud-body">
+          <div class="fraud-name">Dealer #DH-4421</div>
+          <div class="fraud-meta">Multi-lift in 4 min — Dhaka North</div>
+          <div class="risk-track"><div class="risk-fill" style="width:92%;background:var(--red)"></div></div>
+        </div>
+        <div class="pill pill-red" style="font-size:9px">HIGH</div>
+      </div>
+      <div class="fraud-row">
+        <div class="fraud-icon" style="background:var(--amberbg)">⚡</div>
+        <div class="fraud-body">
+          <div class="fraud-name">Dealer #RJ-0892</div>
+          <div class="fraud-meta">Volume spike — Rajshahi</div>
+          <div class="risk-track"><div class="risk-fill" style="width:65%;background:var(--amber)"></div></div>
+        </div>
+        <div class="pill pill-amber" style="font-size:9px">MED</div>
+      </div>
+      <div class="fraud-row">
+        <div class="fraud-icon" style="background:var(--purplebg)">◈</div>
+        <div class="fraud-body">
+          <div class="fraud-name">Beneficiary #BEN-77201</div>
+          <div class="fraud-meta">Duplicate face attempt</div>
+          <div class="risk-track"><div class="risk-fill" style="width:40%;background:var(--purple)"></div></div>
+        </div>
+        <div class="pill pill-purple" style="font-size:9px">LOW</div>
+      </div>
+    </div>
+
+    <!-- Live Feed -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Live Transaction Feed</div>
+        <div class="pulse" style="width:8px;height:8px"></div>
+      </div>
+      <div id="liveFeed"></div>
+    </div>
+  </div>
+
+  <!-- AI Prediction Row -->
+  <div class="panel">
+    <div class="panel-head">
+      <div><div class="panel-title">AI Demand Forecast — Next 30 Days</div><div class="panel-sub">ML model trained on 3-year beneficiary lifting patterns · 94.2% accuracy</div></div>
+      <div class="pill pill-cyan">Model Active</div>
+    </div>
+    <div id="predGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ DEALERS ═══════════════ -->
+<div class="view" id="view-dealers">
+  <div class="page-header">
+    <div><div class="page-title">Dealer Registry</div><div class="page-sub">Manage all registered OMS dealers</div></div>
+    <div class="page-actions">
+      <button class="btn btn-ghost btn-sm" onclick="showToast('Exported dealer list','success')">↓ Export</button>
+      <button class="btn btn-primary btn-sm" onclick="openModal('addDealer')">＋ Register Dealer</button>
+    </div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi c1"><div class="kpi-label">Total Registered</div><div class="kpi-val">3,241</div><div class="kpi-change"><span class="up">↑ 124</span>&nbsp;this month</div></div>
+    <div class="kpi c2"><div class="kpi-label">Active</div><div class="kpi-val">1,847</div><div class="kpi-change" style="color:var(--text3)">56.98% rate</div></div>
+    <div class="kpi c3"><div class="kpi-label">Pending Approval</div><div class="kpi-val">234</div><div class="kpi-change"><span class="dn">↑ 18</span>&nbsp;today</div></div>
+    <div class="kpi c4"><div class="kpi-label">Suspended</div><div class="kpi-val">47</div><div class="kpi-change" style="color:var(--text3)">1.45% of total</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">Dealer List</div>
+      <div class="pill pill-cyan">Live Registry</div>
+    </div>
+    <div class="filter-bar">
+      <div class="search-wrap"><span class="search-icon">⌕</span><input type="text" placeholder="Search dealer ID, name, district..." id="dealerSearch" oninput="filterDealers()"></div>
+      <select class="filter-select" id="dealerStatusFilter" onchange="filterDealers()">
+        <option value="">All Status</option>
+        <option value="Active">Active</option>
+        <option value="Pending">Pending</option>
+        <option value="Suspended">Suspended</option>
+        <option value="Renewal">Renewal Due</option>
+      </select>
+      <select class="filter-select" id="dealerDistrictFilter" onchange="filterDealers()">
+        <option value="">All Districts</option>
+        <option>Dhaka</option><option>Chittagong</option><option>Rajshahi</option>
+        <option>Khulna</option><option>Sylhet</option><option>Barisal</option>
+      </select>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr>
+          <th>Dealer ID</th><th>Name</th><th>District</th><th>License Expiry</th>
+          <th>Monthly Allotment</th><th>Last Transaction</th><th>Rating</th><th>Status</th><th>Action</th>
+        </tr></thead>
+        <tbody id="dealerTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ DISTRIBUTION ═══════════════ -->
+<div class="view" id="view-distribution">
+  <div class="page-header">
+    <div><div class="page-title">Distribution Management</div><div class="page-sub">Track and manage food grain distribution operations</div></div>
+    <div class="page-actions">
+      <button class="btn btn-ghost btn-sm" onclick="openModal('allotment')">＋ Allotment</button>
+      <button class="btn btn-primary btn-sm" onclick="openModal('doOrder')">Generate DO</button>
+    </div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi c1"><div class="kpi-label">Rice Distributed</div><div class="kpi-val">4,821 MT</div><div class="kpi-change"><span class="up">↑ 6.1%</span>&nbsp;vs last week</div></div>
+    <div class="kpi c2"><div class="kpi-label">Flour Distributed</div><div class="kpi-val">1,203 MT</div><div class="kpi-change"><span class="up">↑ 2.3%</span></div></div>
+    <div class="kpi c3"><div class="kpi-label">Pending Allotments</div><div class="kpi-val">89</div><div class="kpi-change"><span class="dn">↑ 12</span>&nbsp;new today</div></div>
+    <div class="kpi c4"><div class="kpi-label">Failed Verifications</div><div class="kpi-val">312</div><div class="kpi-change" style="color:var(--text3)">1.46% failure rate</div></div>
+  </div>
+  <div class="grid-2" style="margin-bottom:14px">
+    <div class="panel">
+      <div class="panel-head"><div><div class="panel-title">Weekly Distribution Trend</div><div class="panel-sub">Rice vs Flour (MT)</div></div></div>
+      <div class="chart-wrap" style="height:160px"><canvas id="distTrendChart"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><div class="panel-title">Distribution by Division</div></div></div>
+      <div class="chart-wrap" style="height:160px"><canvas id="divisionChart"></canvas></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title">Distribution Log — Today</div><div class="pill pill-cyan">Live</div></div>
+    <div class="filter-bar">
+      <div class="search-wrap"><span class="search-icon">⌕</span><input type="text" placeholder="Search beneficiary, dealer..." id="distSearch" oninput="filterDistLog()"></div>
+      <select class="filter-select" onchange="filterDistLog()" id="distStatusFilter">
+        <option value="">All Status</option><option value="Success">Success</option><option value="Rejected">Rejected</option>
+      </select>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>Time</th><th>Dealer ID</th><th>Beneficiary ID</th><th>Item</th><th>Qty</th><th>Verification</th><th>Match %</th><th>Status</th></tr></thead>
+        <tbody id="distLog"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ FRAUD ═══════════════ -->
+<div class="view" id="view-fraud">
+  <div class="page-header">
+    <div><div class="page-title">Fraud Detection Engine</div><div class="page-sub">AI-powered real-time anomaly detection</div></div>
+    <div class="page-actions">
+      <button class="btn btn-ghost btn-sm" onclick="showToast('Fraud report exported','success')">↓ Export Report</button>
+      <button class="btn btn-danger btn-sm" onclick="showToast('All alerts escalated to Senior Officer','success')">Escalate All</button>
+    </div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi c4"><div class="kpi-label">Active Alerts</div><div class="kpi-val">3</div><div class="kpi-change"><span class="dn">↑ 2</span>&nbsp;today</div></div>
+    <div class="kpi c3"><div class="kpi-label">Multi-lift Blocks</div><div class="kpi-val">47</div><div class="kpi-change" style="color:var(--text3)">Today</div></div>
+    <div class="kpi c2"><div class="kpi-label">Resolved This Week</div><div class="kpi-val">18</div><div class="kpi-change"><span class="up">↑ 94%</span>&nbsp;resolution rate</div></div>
+    <div class="kpi c1"><div class="kpi-label">Face Duplicates Caught</div><div class="kpi-val">12</div><div class="kpi-change" style="color:var(--text3)">This month</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-head"><div><div class="panel-title">Fraud Alerts — Active</div></div><div class="pill pill-red">3 Unresolved</div></div>
+      <div id="fraudAlertList"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><div class="panel-title">Fraud Type Breakdown</div><div class="panel-sub">Last 30 days</div></div></div>
+      <div class="chart-wrap" style="height:180px"><canvas id="fraudChart"></canvas></div>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:14px">
+    <div class="panel-head">
+      <div><div class="panel-title">AI Fraud Insight</div><div class="panel-sub">Pattern analysis and recommendations</div></div>
+      <div class="pill pill-cyan">ML Active</div>
+    </div>
+    <div style="background:var(--surface2);border-radius:10px;padding:14px;border-left:3px solid var(--cyan);margin-bottom:10px">
+      <div style="font-size:10px;color:var(--cyan);font-weight:700;margin-bottom:6px;letter-spacing:.5px">AI PATTERN ANALYSIS</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.7">Multi-lift patterns at Dealer <strong style="color:var(--text)">#DH-4421</strong> show 87% similarity to a fraud cluster detected in Dhaka North in Q4 2024. The dealer processed <strong style="color:var(--red)">4 transactions in 4 minutes</strong> for the same beneficiary group — statistically impossible under normal operations. Recommend immediate physical inspection and temporary suspension pending review.</div>
+    </div>
+    <div style="background:var(--surface2);border-radius:10px;padding:14px;border-left:3px solid var(--amber)">
+      <div style="font-size:10px;color:var(--amber);font-weight:700;margin-bottom:6px;letter-spacing:.5px">VOLUME ANOMALY — RAJSHAHI</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.7">Dealer <strong style="color:var(--text)">#RJ-0892</strong> shows a <strong style="color:var(--amber)">247% increase</strong> over their 90-day baseline for this week. Zone average is 40 MT/week; this dealer reported 139 MT. Statistical z-score: 3.8 (threshold: 2.0). Flag confidence: 94.1%.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ ANALYTICS ═══════════════ -->
+<div class="view" id="view-analytics">
+  <div class="page-header">
+    <div><div class="page-title">AI Analytics & Intelligence</div><div class="page-sub">Data-driven insights from beneficiary lifting patterns</div></div>
+    <div class="page-actions">
+      <button class="btn btn-ghost btn-sm" onclick="showToast('Analytics report generated','success')">↓ Download Report</button>
+      <button class="btn btn-primary btn-sm" onclick="showToast('Forecast model refreshed','success')">↺ Refresh Model</button>
+    </div>
+  </div>
+  <div class="inner-tabs">
+    <div class="inner-tab active" onclick="switchInner('demand',this)">Demand Forecast</div>
+    <div class="inner-tab" onclick="switchInner('poverty',this)">Poverty Index</div>
+    <div class="inner-tab" onclick="switchInner('trends',this)">Trends</div>
+    <div class="inner-tab" onclick="switchInner('recommendations',this)">AI Recommendations</div>
+  </div>
+  <div class="inner-view active" id="inner-demand">
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-head"><div><div class="panel-title">30-Day Demand Forecast by Division</div></div><div class="pill pill-cyan">94.2% Accuracy</div></div>
+        <div id="demandBars"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Supply vs Demand Gap</div></div>
+        <div class="chart-wrap" style="height:200px"><canvas id="supplyDemandChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div class="inner-view" id="inner-poverty">
+    <div class="panel">
+      <div class="panel-head"><div><div class="panel-title">Poverty Index — Buying Pattern Analysis</div><div class="panel-sub">Based on 3-year beneficiary lifting frequency</div></div></div>
+      <div class="chart-wrap" style="height:240px"><canvas id="povertyChart"></canvas></div>
+    </div>
+  </div>
+  <div class="inner-view" id="inner-trends">
+    <div class="panel">
+      <div class="panel-head"><div><div class="panel-title">12-Month Distribution Trend</div></div></div>
+      <div class="chart-wrap" style="height:240px"><canvas id="trendsChart"></canvas></div>
+    </div>
+  </div>
+  <div class="inner-view" id="inner-recommendations">
+    <div id="aiRecsPanel"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ USERS ═══════════════ -->
+<div class="view" id="view-users">
+  <div class="page-header">
+    <div><div class="page-title">User Management</div><div class="page-sub">Manage system users, roles and permissions</div></div>
+    <div class="page-actions">
+      <button class="btn btn-primary btn-sm" onclick="openModal('addUser')">＋ Add User</button>
+    </div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi c1"><div class="kpi-label">Total Users</div><div class="kpi-val">284</div><div class="kpi-change"><span class="up">↑ 6</span>&nbsp;this month</div></div>
+    <div class="kpi c2"><div class="kpi-label">Active Sessions</div><div class="kpi-val">47</div><div class="kpi-change" style="color:var(--text3)">Right now</div></div>
+    <div class="kpi c3"><div class="kpi-label">Inactive Accounts</div><div class="kpi-val">23</div><div class="kpi-change" style="color:var(--text3)">Pending review</div></div>
+    <div class="kpi c4"><div class="kpi-label">Failed Logins Today</div><div class="kpi-val">7</div><div class="kpi-change"><span class="dn">↑ 3</span>&nbsp;vs avg</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">Users by Role</div></div>
+      <div class="user-grid" id="userGrid"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">Role Distribution</div></div>
+      <div class="chart-wrap" style="height:170px"><canvas id="userRoleChart"></canvas></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title">User List</div><div class="pill pill-cyan">284 Total</div></div>
+    <div class="filter-bar">
+      <div class="search-wrap"><span class="search-icon">⌕</span><input type="text" placeholder="Search users..." id="userSearch" oninput="filterUsers()"></div>
+      <select class="filter-select" id="roleFilter" onchange="filterUsers()">
+        <option value="">All Roles</option><option>Super Admin</option><option>District Officer</option><option>Inspector</option><option>Dealer</option>
+      </select>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>User ID</th><th>Name</th><th>Role</th><th>Office</th><th>Last Login</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="userTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SETTINGS ═══════════════ -->
+<div class="view" id="view-settings">
+  <div class="page-header">
+    <div><div class="page-title">System Settings</div><div class="page-sub">Configure OMS operation parameters</div></div>
+    <div class="page-actions">
+      <button class="btn btn-primary btn-sm" onclick="showToast('Settings saved successfully','success')">Save Changes</button>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">General Settings</div></div>
+      <div class="setting-row">
+        <div class="setting-info"><div class="s-label">Live Fraud Detection</div><div class="s-desc">Real-time ML anomaly scanning</div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info"><div class="s-label">SMS Notifications</div><div class="s-desc">Alert dealers and officers via SMS</div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info"><div class="s-label">Offline Sync Mode</div><div class="s-desc">Allow dealer app offline caching</div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info"><div class="s-label">Bangladesh Bank Integration</div><div class="s-desc">Real-time payment verification</div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info"><div class="s-label">IP Camera Monitoring</div><div class="s-desc">Live dealer point surveillance</div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info"><div class="s-label">Dual Approval Mode</div><div class="s-desc">Require 2 officers for cancellations</div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">Operation Parameters</div></div>
+      <div class="form-group" style="margin-bottom:12px">
+        <div class="form-label">Face Match Confidence Threshold (%)</div>
+        <input type="range" min="70" max="99" value="85" class="form-input" style="padding:4px 0" oninput="document.getElementById('faceThVal').textContent=this.value+'%'">
+        <div style="font-size:11px;color:var(--cyan);font-family:var(--mono)" id="faceThVal">85%</div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px">
+        <div class="form-label">Max Daily Distributions per Dealer</div>
+        <input type="number" class="form-input" value="500" min="100" max="2000">
+      </div>
+      <div class="form-group" style="margin-bottom:12px">
+        <div class="form-label">Offline Sync Interval (minutes)</div>
+        <input type="number" class="form-input" value="15" min="5" max="60">
+      </div>
+      <div class="form-group" style="margin-bottom:12px">
+        <div class="form-label">Fraud Detection Sensitivity</div>
+        <select class="form-select">
+          <option>High — Flag at 1.5σ deviation</option>
+          <option selected>Medium — Flag at 2.0σ deviation</option>
+          <option>Low — Flag at 3.0σ deviation</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Alert Escalation Timeout (hours)</div>
+        <input type="number" class="form-input" value="24" min="1" max="72">
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /body -->
+</div><!-- /app -->
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalBox">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle">Modal</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════════════════
+function tick(){
+  const n=new Date();
+  document.getElementById('clock').textContent=
+    n.toLocaleTimeString('en-GB',{hour12:false})+' BDT';
+}
+setInterval(tick,1000);tick();
+
+// ═══════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════
+function switchView(id, btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  // init charts on demand
+  initViewCharts(id);
+}
+function setActive(el){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+}
+function switchInner(id,btn){
+  document.querySelectorAll('.inner-view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('inner-'+id).classList.add('active');
+  document.querySelectorAll('.inner-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(id==='poverty') initPovertyChart();
+  if(id==='trends') initTrendsChart();
+}
+
+// ═══════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════
+function showToast(msg,type='info'){
+  const colors={success:'var(--green)',info:'var(--cyan)',warning:'var(--amber)',error:'var(--red)'};
+  const tw=document.getElementById('toastWrap');
+  const t=document.createElement('div');
+  t.className='toast '+(type==='success'?'success':'');
+  t.innerHTML=`<div class="toast-dot" style="background:${colors[type]}"></div><span style="color:var(--text)">${msg}</span>`;
+  tw.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(40px)';t.style.transition='all .3s';setTimeout(()=>t.remove(),300)},2800);
+}
+
+// ═══════════════════════════════════════════════
+//  MODAL SYSTEM
+// ═══════════════════════════════════════════════
+const modals={
+  addDealer:{
+    title:'Register New Dealer',
+    body:`
+      <div class="wizard-steps">
+        <div class="wizard-step"><div class="step-circle active-s">1</div><div class="step-label">Personal</div></div>
+        <div class="wizard-step"><div class="step-circle todo">2</div><div class="step-label">Documents</div></div>
+        <div class="wizard-step"><div class="step-circle todo">3</div><div class="step-label">Review</div></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><div class="form-label">Full Name *</div><input class="form-input" placeholder="Enter full name"></div>
+        <div class="form-group"><div class="form-label">NID Number *</div><input class="form-input" placeholder="19-digit NID"></div>
+        <div class="form-group"><div class="form-label">Mobile Number *</div><input class="form-input" placeholder="+880-XXXXXXXXXX"></div>
+        <div class="form-group"><div class="form-label">District *</div>
+          <select class="form-select"><option>Select District</option><option>Dhaka</option><option>Chittagong</option><option>Rajshahi</option><option>Khulna</option><option>Sylhet</option><option>Barisal</option></select>
+        </div>
+        <div class="form-group full"><div class="form-label">Storage Facility Address *</div><textarea class="form-input" rows="2" placeholder="Full address of food storage point"></textarea></div>
+        <div class="form-group"><div class="form-label">Bank Account No.</div><input class="form-input" placeholder="For Bangladesh Bank integration"></div>
+        <div class="form-group"><div class="form-label">Trade License No.</div><input class="form-input" placeholder="License number"></div>
+      </div>`,
+    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitDealer()">Submit Application</button>`
+  },
+  addUser:{
+    title:'Add New System User',
+    body:`
+      <div class="form-grid">
+        <div class="form-group"><div class="form-label">Full Name *</div><input class="form-input" placeholder="Enter full name"></div>
+        <div class="form-group"><div class="form-label">User ID</div><input class="form-input" placeholder="Auto-generated" readonly style="opacity:.5"></div>
+        <div class="form-group"><div class="form-label">Designation</div><input class="form-input" placeholder="e.g. District Officer"></div>
+        <div class="form-group"><div class="form-label">Mobile *</div><input class="form-input" placeholder="+880-XXXXXXXXXX"></div>
+        <div class="form-group"><div class="form-label">Email</div><input class="form-input" placeholder="official@dgfood.gov.bd"></div>
+        <div class="form-group"><div class="form-label">User Role *</div>
+          <select class="form-select"><option>Select Role</option><option>Super Admin</option><option>District Officer</option><option>Inspector</option><option>Dealer</option></select>
+        </div>
+        <div class="form-group"><div class="form-label">Assigned Office</div>
+          <select class="form-select"><option>Select Office</option><option>Dhaka District Office</option><option>Chittagong DO</option><option>Rajshahi DO</option></select>
+        </div>
+        <div class="form-group"><div class="form-label">Status</div>
+          <select class="form-select"><option>Active</option><option>Inactive</option></select>
+        </div>
+      </div>`,
+    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="showToast('User created — credentials sent via SMS','success');closeModal()">Create User</button>`
+  },
+  allotment:{
+    title:'Create Dealer Allotment',
+    body:`
+      <div class="form-grid">
+        <div class="form-group full"><div class="form-label">Select Dealer *</div>
+          <select class="form-select"><option>Search dealer...</option><option>DH-4421 — Karim Traders, Dhaka</option><option>RJ-0892 — Rahim & Sons, Rajshahi</option><option>KH-1203 — Fatema Store, Khulna</option></select>
+        </div>
+        <div class="form-group"><div class="form-label">Rice Quantity (kg) *</div><input class="form-input" type="number" placeholder="e.g. 50000"></div>
+        <div class="form-group"><div class="form-label">Flour Quantity (kg)</div><input class="form-input" type="number" placeholder="e.g. 10000"></div>
+        <div class="form-group"><div class="form-label">Allotment Period From</div><input class="form-input" type="date"></div>
+        <div class="form-group"><div class="form-label">Allotment Period To</div><input class="form-input" type="date"></div>
+        <div class="form-group"><div class="form-label">OMS Program</div>
+          <select class="form-select"><option>OMS Rice — Dhaka Q1 2025</option><option>OMS Flour — National 2025</option></select>
+        </div>
+        <div class="form-group full"><div class="form-label">Notes</div><textarea class="form-input" rows="2" placeholder="Optional notes for this allotment"></textarea></div>
+      </div>`,
+    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="showToast('Allotment issued — SMS sent to dealer','success');closeModal()">Issue Allotment</button>`
+  },
+  doOrder:{
+    title:'Generate Delivery Order (DO)',
+    body:`
+      <div class="form-grid">
+        <div class="form-group full"><div class="form-label">Select Dealer *</div>
+          <select class="form-select"><option>Search dealer...</option><option>DH-4421 — Karim Traders (Deposit: ✓ Verified)</option><option>RJ-0892 — Rahim & Sons (Deposit: ✓ Verified)</option></select>
+        </div>
+        <div class="form-group"><div class="form-label">DO Reference No.</div><input class="form-input" placeholder="Auto-generated" readonly style="opacity:.5"></div>
+        <div class="form-group"><div class="form-label">Warehouse</div>
+          <select class="form-select"><option>Central Warehouse, Dhaka</option><option>Chittagong Depot</option><option>Rajshahi Silo</option></select>
+        </div>
+        <div class="form-group"><div class="form-label">Collection Deadline</div><input class="form-input" type="date"></div>
+        <div class="form-group"><div class="form-label">Rice (kg)</div><input class="form-input" type="number" readonly placeholder="From allotment" style="opacity:.7"></div>
+        <div class="form-group"><div class="form-label">Flour (kg)</div><input class="form-input" type="number" readonly placeholder="From allotment" style="opacity:.7"></div>
+      </div>
+      <div style="background:var(--greenbg);border:1px solid rgba(0,230,118,.2);border-radius:8px;padding:10px;font-size:11px;color:var(--green)">
+        ✓ Deposit verified by Bangladesh Bank — DO generation authorized
+      </div>`,
+    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="showToast('DO generated — QR code sent to dealer','success');closeModal()">Generate DO</button>`
+  },
+  fraudDetail:{
+    title:'Fraud Alert — Action Required',
+    body:`
+      <div style="background:var(--redbg);border:1px solid rgba(255,82,82,.25);border-radius:10px;padding:14px;margin-bottom:14px">
+        <div style="font-size:10px;color:var(--red);font-weight:700;letter-spacing:.5px;margin-bottom:4px">HIGH RISK — MULTI-LIFT DETECTED</div>
+        <div style="font-size:13px;font-weight:700">Dealer #DH-4421 · Karim Traders · Dhaka North</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">4 transactions in 4 minutes for same beneficiary group · Risk Score: 92/100</div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><div class="form-label">Detection Time</div><input class="form-input" value="Today, 09:42:17 BDT" readonly style="opacity:.7"></div>
+        <div class="form-group"><div class="form-label">AI Confidence</div><input class="form-input" value="94.1% — High Confidence" readonly style="opacity:.7;color:var(--red)"></div>
+        <div class="form-group full"><div class="form-label">Select Action *</div>
+          <select class="form-select">
+            <option>Suspend Dealer — Pending Investigation</option>
+            <option>Dispatch Inspector for Physical Verification</option>
+            <option>Escalate to Senior District Officer</option>
+            <option>Dismiss Alert — Add Justification</option>
+          </select>
+        </div>
+        <div class="form-group full"><div class="form-label">Officer Notes *</div><textarea class="form-input" rows="3" placeholder="Document your findings and action taken..."></textarea></div>
+      </div>`,
+    foot:`<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-danger" onclick="showToast('Alert resolved — Dealer suspended pending review','success');closeModal()">Confirm Action</button>`
+  }
+};
+
+function openModal(key){
+  const m=modals[key];
+  if(!m)return;
+  document.getElementById('modalTitle').textContent=m.title;
+  document.getElementById('modalBody').innerHTML=m.body;
+  document.getElementById('modalFoot').innerHTML=m.foot;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open')}
+function submitDealer(){showToast('Dealer application submitted — Tracking ID sent via SMS','success');closeModal();}
+
+// ═══════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════
+const dealerData=[
+  {id:'DH-4421',name:'Karim Traders',district:'Dhaka',expiry:'2025-06-30',allotment:'50 MT',last:'2 min ago',rating:'★★☆',status:'Suspended'},
+  {id:'RJ-0892',name:'Rahim & Sons',district:'Rajshahi',expiry:'2025-12-15',allotment:'40 MT',last:'8 min ago',rating:'★★★★',status:'Active'},
+  {id:'KH-1203',name:'Fatema Store',district:'Khulna',expiry:'2025-11-22',allotment:'35 MT',last:'15 min ago',rating:'★★★★★',status:'Active'},
+  {id:'CT-3301',name:'Arif Depot',district:'Chittagong',expiry:'—',allotment:'60 MT',last:'—',rating:'—',status:'Pending'},
+  {id:'SY-0541',name:'Mina Suppliers',district:'Sylhet',expiry:'2025-09-10',allotment:'30 MT',last:'1hr ago',rating:'★★★',status:'Active'},
+  {id:'BR-0201',name:'Hasan Rice Co.',district:'Barisal',expiry:'2025-03-31',allotment:'25 MT',last:'45 min ago',rating:'★★★★',status:'Renewal'},
+  {id:'MY-0812',name:'Noor Agro',district:'Mymensingh',expiry:'2025-08-19',allotment:'45 MT',last:'2hr ago',rating:'★★★',status:'Active'},
+  {id:'RP-0442',name:'Begum Traders',district:'Rangpur',expiry:'2025-07-05',allotment:'38 MT',last:'3hr ago',rating:'★★★★',status:'Active'},
+];
+const distLogData=[
+  {time:'09:42',dealer:'DH-4421',ben:'BEN-77201',item:'Rice',qty:'10 kg',auth:'Face Auth',match:'91%',status:'Success'},
+  {time:'09:38',dealer:'RJ-0892',ben:'BEN-12043',item:'Flour',qty:'5 kg',auth:'Face Auth',match:'96%',status:'Success'},
+  {time:'09:35',dealer:'KH-1203',ben:'BEN-33912',item:'Rice',qty:'10 kg',auth:'Face Auth',match:'72%',status:'Rejected'},
+  {time:'09:31',dealer:'CT-3301',ben:'BEN-04521',item:'Rice',qty:'10 kg',auth:'Face Auth',match:'98%',status:'Success'},
+  {time:'09:28',dealer:'SY-0541',ben:'BEN-99812',item:'Flour',qty:'5 kg',auth:'Face Auth',match:'94%',status:'Success'},
+  {time:'09:22',dealer:'BR-0201',ben:'BEN-55603',item:'Rice',qty:'10 kg',auth:'Face Auth',match:'89%',status:'Success'},
+  {time:'09:17',dealer:'MY-0812',ben:'BEN-22111',item:'Rice',qty:'10 kg',auth:'Face Auth',match:'67%',status:'Rejected'},
+  {time:'09:08',dealer:'RP-0442',ben:'BEN-44302',item:'Flour',qty:'5 kg',auth:'Face Auth',match:'97%',status:'Success'},
+];
+const usersData=[
+  {id:'USR-001',name:'MD. Rafiqul Islam',role:'Super Admin',office:'HQ Dhaka',last:'Just now',status:'Active'},
+  {id:'USR-042',name:'Fatema Begum',role:'District Officer',office:'Dhaka DO',last:'5 min ago',status:'Active'},
+  {id:'USR-103',name:'Kamal Hossain',role:'Inspector',office:'Rajshahi DO',last:'22 min ago',status:'Active'},
+  {id:'USR-201',name:'Rina Khatun',role:'District Officer',office:'Chittagong DO',last:'1hr ago',status:'Active'},
+  {id:'USR-312',name:'Jamal Uddin',role:'Inspector',office:'Khulna DO',last:'3hr ago',status:'Active'},
+  {id:'USR-445',name:'Nasrin Akter',role:'District Officer',office:'Sylhet DO',last:'Yesterday',status:'Inactive'},
+];
+
+// ═══════════════════════════════════════════════
+//  RENDER TABLES
+// ═══════════════════════════════════════════════
+function renderDealerTable(data){
+  const tbody=document.getElementById('dealerTable');
+  if(!tbody)return;
+  tbody.innerHTML=data.map(d=>{
+    const sc={Active:'s-active',Pending:'s-pending',Suspended:'s-suspended',Renewal:'s-renewal'}[d.status]||'s-pending';
+    return `<tr>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--cyan)">${d.id}</td>
+      <td>${d.name}</td><td>${d.district}</td>
+      <td style="font-family:var(--mono);font-size:10px">${d.expiry}</td>
+      <td style="color:var(--cyan)">${d.allotment}</td>
+      <td style="color:var(--text3)">${d.last}</td>
+      <td style="color:var(--amber)">${d.rating}</td>
+      <td><span class="status ${sc}">${d.status}</span></td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="showToast('Viewing ${d.name}','info')" style="font-size:9px;padding:3px 8px">View</button>
+        ${d.status==='Pending'?`<button class="btn btn-success btn-sm" onclick="showToast('${d.name} approved','success')" style="font-size:9px;padding:3px 8px;margin-left:4px">Approve</button>`:''}
+        ${d.status==='Active'||d.status==='Renewal'?`<button class="btn btn-ghost btn-sm" onclick="openModal('allotment')" style="font-size:9px;padding:3px 8px;margin-left:4px">Allot</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+function filterDealers(){
+  const q=document.getElementById('dealerSearch').value.toLowerCase();
+  const sf=document.getElementById('dealerStatusFilter').value;
+  const df=document.getElementById('dealerDistrictFilter').value;
+  renderDealerTable(dealerData.filter(d=>
+    (!q||(d.id+d.name+d.district).toLowerCase().includes(q))&&
+    (!sf||d.status===sf)&&(!df||d.district===df)
+  ));
+}
+function renderDistLog(data){
+  const tbody=document.getElementById('distLog');
+  if(!tbody)return;
+  tbody.innerHTML=data.map(d=>{
+    const isOk=d.status==='Success';
+    const matchPct=parseInt(d.match);
+    const matchColor=matchPct>=90?'var(--green)':matchPct>=80?'var(--amber)':'var(--red)';
+    return `<tr>
+      <td style="font-family:var(--mono);font-size:10px">${d.time}</td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--cyan)">${d.dealer}</td>
+      <td style="font-family:var(--mono);font-size:10px">${d.ben}</td>
+      <td>${d.item}</td><td>${d.qty}</td>
+      <td style="color:var(--teal)">${d.auth}</td>
+      <td style="font-family:var(--mono);color:${matchColor};font-weight:700">${d.match}</td>
+      <td><span class="status ${isOk?'s-active':'s-suspended'}">${d.status}</span></td>
+    </tr>`;
+  }).join('');
+}
+function filterDistLog(){
+  const q=document.getElementById('distSearch').value.toLowerCase();
+  const sf=document.getElementById('distStatusFilter').value;
+  renderDistLog(distLogData.filter(d=>
+    (!q||(d.dealer+d.ben).toLowerCase().includes(q))&&(!sf||d.status===sf)
+  ));
+}
+function renderUserTable(data){
+  const tbody=document.getElementById('userTable');
+  if(!tbody)return;
+  tbody.innerHTML=data.map(u=>{
+    const rc={
+      'Super Admin':'pill-red','District Officer':'pill-cyan',
+      'Inspector':'pill-amber','Dealer':'pill-green'
+    }[u.role]||'pill-teal';
+    return `<tr>
+      <td style="font-family:var(--mono);font-size:10px">${u.id}</td>
+      <td>${u.name}</td>
+      <td><span class="pill ${rc}" style="font-size:9px">${u.role}</span></td>
+      <td>${u.office}</td>
+      <td style="color:var(--text3)">${u.last}</td>
+      <td><span class="status ${u.status==='Active'?'s-active':'s-suspended'}">${u.status}</span></td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="showToast('Editing ${u.name}','info')" style="font-size:9px;padding:3px 8px">Edit</button>
+        <button class="btn btn-ghost btn-sm" onclick="showToast('Password reset sent','success')" style="font-size:9px;padding:3px 8px;margin-left:4px">Reset PW</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function filterUsers(){
+  const q=document.getElementById('userSearch').value.toLowerCase();
+  const rf=document.getElementById('roleFilter').value;
+  renderUserTable(usersData.filter(u=>
+    (!q||(u.id+u.name+u.office).toLowerCase().includes(q))&&(!rf||u.role===rf)
+  ));
+}
+
+// ═══════════════════════════════════════════════
+//  DIVISION MAP
+// ═══════════════════════════════════════════════
+function renderDivisionMap(){
+  const el=document.getElementById('divisionMap');
+  if(!el)return;
+  const divs=[
+    {n:'Dhaka',v:62,c:'var(--cyan)'},{n:'Chittagong',v:54,c:'#5BB8E8'},
+    {n:'Rajshahi',v:48,c:'#4AABDC'},{n:'Khulna',v:41,c:'#3A9ED0'},
+    {n:'Sylhet',v:35,c:'#2A8FC4'},{n:'Barisal',v:28,c:'#1A80B8'},
+    {n:'Rangpur',v:44,c:'#3A9ED0'},{n:'Mymensingh',v:31,c:'#2A8FC4'},
+  ];
+  el.innerHTML=divs.map(d=>{
+    const alpha=0.06+(d.v/70)*0.3;
+    return `<div class="heat-cell" style="background:rgba(0,212,255,${alpha});border-color:rgba(0,212,255,${alpha*2})" onclick="showToast('${d.n}: ${d.v}K served today','info')">
+      <div class="heat-name">${d.n}</div>
+      <div class="heat-val" style="color:${d.c}">${d.v}K</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  LIVE FEED
+// ═══════════════════════════════════════════════
+const txTypes=[
+  {msg:'Distribution verified',color:'var(--green)',id:'BEN'},
+  {msg:'Dealer deposit confirmed',color:'var(--cyan)',id:'DEP'},
+  {msg:'Allotment received',color:'var(--purple)',id:'ALT'},
+  {msg:'Face auth success',color:'var(--teal)',id:'FAC'},
+  {msg:'Beneficiary registered',color:'var(--amber)',id:'REG'},
+  {msg:'DO generated',color:'var(--cyan)',id:'DO-'},
+];
+function addLiveTx(){
+  const feed=document.getElementById('liveFeed');
+  if(!feed)return;
+  const t=txTypes[Math.floor(Math.random()*txTypes.length)];
+  const id=t.id+'-'+Math.floor(Math.random()*9000+1000);
+  const now=new Date();
+  const row=document.createElement('div');
+  row.className='ticker-row';
+  row.innerHTML=`<span class="ticker-time">${now.toTimeString().slice(0,5)}</span><div class="ticker-dot" style="background:${t.color}"></div><span class="ticker-msg">${t.msg}</span><span class="ticker-val">${id}</span>`;
+  feed.insertBefore(row,feed.firstChild);
+  if(feed.children.length>7)feed.removeChild(feed.lastChild);
+}
+for(let i=0;i<7;i++)addLiveTx();
+setInterval(addLiveTx,3000);
+
+// ═══════════════════════════════════════════════
+//  PREDICTION GRID
+// ═══════════════════════════════════════════════
+function renderPredGrid(){
+  const el=document.getElementById('predGrid');
+  if(!el)return;
+  const areas=[['Dhaka',88,'var(--red)'],['Chittagong',74,'var(--red)'],['Rajshahi',65,'var(--amber)'],['Khulna',58,'var(--amber)'],['Sylhet',42,'var(--green)'],['Barisal',39,'var(--green)'],['Rangpur',61,'var(--amber)'],['Mymensingh',47,'var(--green)']];
+  el.innerHTML=areas.map(([a,d,c])=>`
+    <div style="background:var(--surface2);border-radius:10px;padding:12px;border:1px solid var(--border);cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='${c}'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600">${a}</div>
+      <div style="font-size:22px;font-weight:800;font-family:var(--mono);color:${c}">${d}%</div>
+      <div style="font-size:9px;color:var(--text3);margin-top:2px">${d>70?'High Demand':d>55?'Moderate':'Optimal'}</div>
+      <div style="height:3px;background:var(--bg4);border-radius:2px;margin-top:8px"><div style="width:${d}%;height:100%;background:${c};border-radius:2px"></div></div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  SPARKLINES (KPI)
+// ═══════════════════════════════════════════════
+function renderSpark(id,vals,color){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const max=Math.max(...vals);
+  el.innerHTML=vals.map((v,i)=>`<div class="spark-b" style="height:${Math.round((v/max)*100)}%;background:${i===vals.length-1?color:'rgba(255,255,255,.12)'}"></div>`).join('');
+}
+renderSpark('spark1',[180,195,210,198,215,220,205,225,218,230,215,240,228,214],'var(--cyan)');
+renderSpark('spark2',[170,178,185,181,190,188,195,192,200,197,205,201,208,205],'var(--green)');
+renderSpark('spark3',[200,215,205,220,218,225,210,230,222,228,225,235,228,234],'var(--amber)');
+renderSpark('spark4',[1,0,2,1,3,0,1,2,0,1,2,1,1,3],'var(--red)');
+
+// ═══════════════════════════════════════════════
+//  FRAUD ALERTS LIST
+// ═══════════════════════════════════════════════
+function renderFraudAlerts(){
+  const el=document.getElementById('fraudAlertList');
+  if(!el)return;
+  const alerts=[
+    {id:'DH-4421',name:'Karim Traders',type:'Multi-Lift',loc:'Dhaka North',risk:92,color:'var(--red)',level:'HIGH'},
+    {id:'RJ-0892',name:'Rahim & Sons',type:'Volume Anomaly',loc:'Rajshahi',risk:65,color:'var(--amber)',level:'MED'},
+    {id:'BEN-77201',name:'Beneficiary',type:'Duplicate Face',loc:'Dhaka Central',risk:40,color:'var(--purple)',level:'LOW'},
+  ];
+  el.innerHTML=alerts.map(a=>`
+    <div class="fraud-row">
+      <div class="fraud-icon" style="background:${a.color}22;font-size:18px">⚠</div>
+      <div class="fraud-body">
+        <div class="fraud-name">${a.type} — ${a.id}</div>
+        <div class="fraud-meta">${a.name} · ${a.loc}</div>
+        <div class="risk-track"><div class="risk-fill" style="width:${a.risk}%;background:${a.color}"></div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+        <span class="pill ${a.level==='HIGH'?'pill-red':a.level==='MED'?'pill-amber':'pill-purple'}" style="font-size:9px">${a.level}</span>
+        <button class="btn btn-ghost btn-sm" onclick="openModal('fraudDetail')" style="font-size:9px;padding:3px 8px">Resolve</button>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  AI RECS
+// ═══════════════════════════════════════════════
+function renderAiRecs(){
+  const el=document.getElementById('aiRecsPanel');
+  if(!el)return;
+  const recs=[
+    {icon:'↑',color:'var(--red)',title:'Increase Barisal Allocation',desc:'Barisal lifting demand is 23% above national average. Recommend 15% quota increase for next cycle to prevent shortage.'},
+    {icon:'⏰',color:'var(--amber)',title:'Rangpur Seasonal Peak Incoming',desc:'Historical patterns show Rangpur demand spikes 40% in Nov–Feb. Pre-position stock by October to avoid distribution gaps.'},
+    {icon:'✓',color:'var(--green)',title:'Dhaka Distribution Efficiency Optimal',desc:'Current allocation in Dhaka matches demand within ±3% tolerance. Model suggests maintaining current quota for Q2 2025.'},
+    {icon:'◈',color:'var(--purple)',title:'Sylhet Data Coverage Gap',desc:'Sylhet minority beneficiary data is sparse (under 6 months). Recommendation: ground survey in Q4 for better model accuracy.'},
+    {icon:'⚠',color:'var(--cyan)',title:'Upazila Expansion Readiness',desc:'System is ready to onboard upazila-level operations. Database scaling will add ~300K beneficiaries — pre-approve server upgrade before Q3 launch.'},
+  ];
+  el.innerHTML=recs.map(r=>`
+    <div style="display:flex;gap:12px;background:var(--surface);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border);border-left:3px solid ${r.color}">
+      <div style="width:28px;height:28px;border-radius:8px;background:${r.color}22;display:flex;align-items:center;justify-content:center;font-size:14px;color:${r.color};flex-shrink:0">${r.icon}</div>
+      <div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px">${r.title}</div><div style="font-size:11px;color:var(--text2);line-height:1.6">${r.desc}</div></div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  USER GRID
+// ═══════════════════════════════════════════════
+function renderUserGrid(){
+  const el=document.getElementById('userGrid');
+  if(!el)return;
+  const roles=[
+    {role:'Super Admin',count:4,color:'var(--red)'},
+    {role:'District Officers',count:28,color:'var(--cyan)'},
+    {role:'Inspectors',count:112,color:'var(--amber)'},
+    {role:'Dealers (Active)',count:140,color:'var(--green)'},
+  ];
+  el.innerHTML=roles.map(r=>`
+    <div class="user-card">
+      <div class="user-avatar" style="background:${r.color}22;color:${r.color}">${r.role[0]}</div>
+      <div><div class="user-name">${r.role}</div><div class="user-role" style="color:${r.color};font-weight:700;font-family:var(--mono)">${r.count} users</div></div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  DEMAND BARS
+// ═══════════════════════════════════════════════
+function renderDemandBars(){
+  const el=document.getElementById('demandBars');
+  if(!el)return;
+  const data=[
+    ['Barisal',88,'var(--red)'],['Chittagong',74,'var(--red)'],
+    ['Rangpur',65,'var(--amber)'],['Rajshahi',61,'var(--amber)'],
+    ['Mymensingh',52,'var(--amber)'],['Khulna',47,'var(--green)'],
+    ['Sylhet',42,'var(--green)'],['Dhaka',35,'var(--green)'],
+  ];
+  el.innerHTML=data.map(([l,v,c])=>`
+    <div class="pred-row">
+      <div class="pred-label">${l}</div>
+      <div class="pred-track"><div class="pred-fill" style="width:${v}%;background:${c}"></div></div>
+      <div class="pred-val" style="color:${c}">${v}%</div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  CHARTS
+// ═══════════════════════════════════════════════
+const chartInstances={};
+function destroyChart(id){if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id];}}
+
+const chartDefaults={
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{
+    backgroundColor:'#1A2540',borderColor:'rgba(255,255,255,.1)',borderWidth:1,
+    titleColor:'#F0F4FF',bodyColor:'#8B9DBF',padding:10,
+    titleFont:{family:"'Outfit',sans-serif",size:11},
+    bodyFont:{family:"'Outfit',sans-serif",size:11},
+  }},
+  scales:{
+    x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#4A5D7A',font:{size:9,family:"'Outfit',sans-serif"}}},
+    y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#4A5D7A',font:{size:9,family:"'Outfit',sans-serif"}}},
+  }
+};
+
+function initDashCharts(){
+  destroyChart('distChart');
+  const ctx=document.getElementById('distChart');
+  if(!ctx)return;
+  chartInstances['distChart']=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:['D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12','D13','Today'],
+      datasets:[{
+        data:[180,195,210,198,215,220,205,225,218,230,215,240,228,214],
+        backgroundColor:function(ctx){return ctx.dataIndex===13?'#00D4FF':'rgba(0,212,255,.25)';},
+        borderRadius:4,borderSkipped:false,
+      }]
+    },
+    options:{...chartDefaults,plugins:{...chartDefaults.plugins}}
+  });
+}
+
+function initDistCharts(){
+  destroyChart('distTrendChart');
+  const c1=document.getElementById('distTrendChart');
+  if(c1) chartInstances['distTrendChart']=new Chart(c1,{
+    type:'line',
+    data:{
+      labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      datasets:[
+        {label:'Rice',data:[680,720,695,750,740,780,760],borderColor:'#00D4FF',backgroundColor:'rgba(0,212,255,.08)',tension:.4,fill:true,pointBackgroundColor:'#00D4FF',pointRadius:3},
+        {label:'Flour',data:[180,195,175,210,200,215,205],borderColor:'#FFB300',backgroundColor:'rgba(255,179,0,.06)',tension:.4,fill:true,pointBackgroundColor:'#FFB300',pointRadius:3},
+      ]
+    },
+    options:{...chartDefaults,plugins:{
+      legend:{display:true,labels:{color:'#8B9DBF',font:{size:10,family:"'Outfit',sans-serif"},boxWidth:8,padding:12}},
+      tooltip:chartDefaults.plugins.tooltip
+    }}
+  });
+  destroyChart('divisionChart');
+  const c2=document.getElementById('divisionChart');
+  if(c2) chartInstances['divisionChart']=new Chart(c2,{
+    type:'doughnut',
+    data:{
+      labels:['Dhaka','Chittagong','Rajshahi','Khulna','Sylhet','Others'],
+      datasets:[{data:[28,22,16,14,10,10],backgroundColor:['#00D4FF','#4DD0E1','#00E676','#CE93D8','#FFB300','#3A4B6A'],borderWidth:0,hoverOffset:6}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'right',labels:{color:'#8B9DBF',font:{size:10,family:"'Outfit',sans-serif"},boxWidth:8,padding:8}},tooltip:chartDefaults.plugins.tooltip}
+    }
+  });
+}
+
+function initFraudChart(){
+  destroyChart('fraudChart');
+  const c=document.getElementById('fraudChart');
+  if(!c)return;
+  chartInstances['fraudChart']=new Chart(c,{
+    type:'bar',
+    data:{
+      labels:['Multi-lift','Vol Anomaly','Face Dup','Rapid Tx','Quota Over'],
+      datasets:[{
+        data:[47,28,12,19,33],
+        backgroundColor:['#FF5252','#FFB300','#CE93D8','#4DD0E1','#FF7043'],
+        borderRadius:6,borderSkipped:false,
+      }]
+    },
+    options:{...chartDefaults,plugins:{...chartDefaults.plugins},indexAxis:'y',
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#4A5D7A',font:{size:9}}},
+        y:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8B9DBF',font:{size:10}}},
+      }
+    }
+  });
+}
+
+function initSupplyDemandChart(){
+  destroyChart('supplyDemandChart');
+  const c=document.getElementById('supplyDemandChart');
+  if(!c)return;
+  chartInstances['supplyDemandChart']=new Chart(c,{
+    type:'bar',
+    data:{
+      labels:['Dhaka','Chittagong','Rajshahi','Khulna','Sylhet','Barisal','Rangpur','Mymensingh'],
+      datasets:[
+        {label:'Supply',data:[90,80,75,70,65,55,72,60],backgroundColor:'rgba(0,212,255,.4)',borderRadius:4,borderSkipped:false},
+        {label:'Demand',data:[88,74,65,58,42,88,61,47],backgroundColor:'rgba(255,179,0,.4)',borderRadius:4,borderSkipped:false},
+      ]
+    },
+    options:{...chartDefaults,plugins:{
+      legend:{display:true,labels:{color:'#8B9DBF',font:{size:10,family:"'Outfit',sans-serif"},boxWidth:8,padding:12}},
+      tooltip:chartDefaults.plugins.tooltip
+    }}
+  });
+}
+
+function initPovertyChart(){
+  destroyChart('povertyChart');
+  const c=document.getElementById('povertyChart');
+  if(!c)return;
+  chartInstances['povertyChart']=new Chart(c,{
+    type:'radar',
+    data:{
+      labels:['Dhaka','Chittagong','Rajshahi','Khulna','Sylhet','Barisal','Rangpur','Mymensingh'],
+      datasets:[
+        {label:'2023',data:[32,41,52,58,64,78,71,48],borderColor:'rgba(0,212,255,.6)',backgroundColor:'rgba(0,212,255,.06)',pointBackgroundColor:'#00D4FF',pointRadius:4},
+        {label:'2024',data:[29,38,50,55,60,82,74,45],borderColor:'rgba(255,179,0,.6)',backgroundColor:'rgba(255,179,0,.06)',pointBackgroundColor:'#FFB300',pointRadius:4},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{r:{grid:{color:'rgba(255,255,255,.06)'},ticks:{color:'#4A5D7A',backdropColor:'transparent',font:{size:8}},pointLabels:{color:'#8B9DBF',font:{size:10}},angleLines:{color:'rgba(255,255,255,.06)'}}},
+      plugins:{legend:{display:true,labels:{color:'#8B9DBF',font:{size:10,family:"'Outfit',sans-serif"},boxWidth:8,padding:12}},tooltip:chartDefaults.plugins.tooltip}
+    }
+  });
+}
+
+function initTrendsChart(){
+  destroyChart('trendsChart');
+  const c=document.getElementById('trendsChart');
+  if(!c)return;
+  chartInstances['trendsChart']=new Chart(c,{
+    type:'line',
+    data:{
+      labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      datasets:[
+        {label:'2024',data:[185,190,210,205,220,215,225,230,222,240,228,235],borderColor:'#00D4FF',backgroundColor:'rgba(0,212,255,.06)',tension:.4,fill:true,pointBackgroundColor:'#00D4FF',pointRadius:3},
+        {label:'2023',data:[160,168,175,180,188,182,195,200,195,210,205,212],borderColor:'rgba(206,147,216,.7)',backgroundColor:'rgba(206,147,216,.04)',tension:.4,fill:true,pointBackgroundColor:'#CE93D8',pointRadius:3},
+      ]
+    },
+    options:{...chartDefaults,plugins:{
+      legend:{display:true,labels:{color:'#8B9DBF',font:{size:10,family:"'Outfit',sans-serif"},boxWidth:8,padding:12}},
+      tooltip:chartDefaults.plugins.tooltip
+    }}
+  });
+}
+
+function initUserRoleChart(){
+  destroyChart('userRoleChart');
+  const c=document.getElementById('userRoleChart');
+  if(!c)return;
+  chartInstances['userRoleChart']=new Chart(c,{
+    type:'doughnut',
+    data:{
+      labels:['Super Admin','District Officers','Inspectors','Dealers'],
+      datasets:[{data:[4,28,112,140],backgroundColor:['#FF5252','#00D4FF','#FFB300','#00E676'],borderWidth:0,hoverOffset:8}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'right',labels:{color:'#8B9DBF',font:{size:10,family:"'Outfit',sans-serif"},boxWidth:8,padding:8}},tooltip:chartDefaults.plugins.tooltip}
+    }
+  });
+}
+
+function initViewCharts(id){
+  if(id==='dashboard'){initDashCharts();}
+  if(id==='distribution'){initDistCharts();renderDistLog(distLogData);}
+  if(id==='fraud'){initFraudChart();renderFraudAlerts();}
+  if(id==='analytics'){initSupplyDemandChart();renderDemandBars();renderAiRecs();}
+  if(id==='users'){initUserRoleChart();renderUserTable(usersData);renderUserGrid();}
+}
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+renderDealerTable(dealerData);
+renderDivisionMap();
+renderPredGrid();
+renderAiRecs();
+initDashCharts();
+
+// Auto-update KPIs
+setInterval(()=>{
+  const k1=document.getElementById('k1');
+  if(k1){
+    const cur=parseInt(k1.textContent.replace(/,/g,''));
+    k1.textContent=(cur+Math.floor(Math.random()*5+1)).toLocaleString('en-IN');
+  }
+},4000);
+</script>
+</body>
+</html>

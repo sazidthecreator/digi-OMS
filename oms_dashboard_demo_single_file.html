@@ -1,0 +1,343 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OMS Control Platform Demo — Dashboard</title>
+  <style>
+    :root{
+      --bg:#07111f;
+      --panel:#0b1628;
+      --panel-2:#0f1d33;
+      --line:rgba(255,255,255,.08);
+      --muted:#9fb0c8;
+      --text:#eef6ff;
+      --cyan:#26c6da;
+      --green:#31d17c;
+      --amber:#f7b955;
+      --red:#ff6a6a;
+      --blue:#5aa9ff;
+      --shadow:0 20px 45px rgba(0,0,0,.28);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(38,198,218,.10), transparent 22%),
+        radial-gradient(circle at 85% 80%, rgba(247,185,85,.10), transparent 24%),
+        linear-gradient(180deg,#06101d,#0a1424 45%, #09131f 100%);
+      min-height:100vh;
+    }
+    .container{max-width:1400px;margin:0 auto;padding:24px}
+    .header{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+      margin-bottom:18px;padding:18px 20px;border:1px solid var(--line);border-radius:28px;
+      background:rgba(11,22,40,.76);backdrop-filter: blur(10px);box-shadow:var(--shadow);
+    }
+    .brand h1{margin:0;font-size:30px;letter-spacing:.2px}
+    .brand p{margin:8px 0 0;color:var(--muted);font-size:14px;max-width:860px}
+    .chips{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);color:#dce8f8;background:rgba(255,255,255,.04);font-size:13px}
+    .chip.cyan{background:rgba(38,198,218,.12);color:#bff6ff;border-color:rgba(38,198,218,.18)}
+    .chip.green{background:rgba(49,209,124,.12);color:#bdfad8;border-color:rgba(49,209,124,.18)}
+    .chip.amber{background:rgba(247,185,85,.12);color:#ffe5b6;border-color:rgba(247,185,85,.18)}
+    .topbar{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:16px 0 22px}
+    .card{
+      background:linear-gradient(180deg, rgba(15,29,51,.88), rgba(11,22,40,.92));
+      border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);
+    }
+    .stat-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .icon{
+      width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:18px;font-weight:700;
+      background:rgba(255,255,255,.05);border:1px solid var(--line)
+    }
+    .icon.cyan{color:#bff6ff;background:rgba(38,198,218,.12)}
+    .icon.green{color:#c7ffe0;background:rgba(49,209,124,.12)}
+    .icon.amber{color:#ffe6bf;background:rgba(247,185,85,.12)}
+    .icon.red{color:#ffd1d1;background:rgba(255,106,106,.12)}
+    .label{color:var(--muted);font-size:13px}
+    .value{font-size:34px;font-weight:800;margin:8px 0 6px}
+    .sub{color:var(--muted);font-size:13px}
+    .grid-main{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:18px}
+    .grid-bottom{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:18px}
+    .panel-title{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+    .panel-title h3{margin:0;font-size:18px}
+    .panel-title p{margin:6px 0 0;color:var(--muted);font-size:13px}
+    .badge{padding:7px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;white-space:nowrap}
+    .badge.cyan{background:rgba(38,198,218,.12);color:#bff6ff}
+    .badge.green{background:rgba(49,209,124,.12);color:#bdfad8}
+    .badge.amber{background:rgba(247,185,85,.12);color:#ffe6bf}
+    .badge.red{background:rgba(255,106,106,.12);color:#ffd1d1}
+    .chart-wrap{height:310px}
+    svg{display:block;width:100%;height:100%}
+    .legend{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+    .legend .mini{padding:12px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--line);text-align:center}
+    .legend .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-bottom:8px}
+    .mini small{display:block;color:var(--muted);margin-bottom:4px}
+    .mini strong{font-size:22px}
+    .bar-row{display:grid;grid-template-columns:110px 1fr 70px;gap:12px;align-items:center;margin:14px 0}
+    .bar-track{height:10px;border-radius:999px;background:#10213a;overflow:hidden;border:1px solid rgba(255,255,255,.05)}
+    .bar-fill{height:100%;border-radius:999px}
+    .bar-fill.cyan{background:linear-gradient(90deg,#1f9fd1,#2dd4bf)}
+    .bar-fill.amber{background:linear-gradient(90deg,#f6ad55,#f59e0b)}
+    .zone-map{position:relative;height:310px;border-radius:20px;border:1px solid var(--line);background:
+      radial-gradient(circle at 30% 20%, rgba(38,198,218,.08), transparent 18%),
+      radial-gradient(circle at 70% 75%, rgba(247,185,85,.08), transparent 18%),
+      linear-gradient(180deg,#0c1628,#0a1322);
+      overflow:hidden;
+    }
+    .zone-map:before{content:"";position:absolute;inset:22px;border:1px dashed rgba(38,198,218,.12);border-radius:26px}
+    .zone{position:absolute;transform:translate(-50%,-50%)}
+    .zone .pulse{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.65);position:relative}
+    .zone .pulse::after{content:"";position:absolute;inset:-8px;border-radius:50%;background:currentColor;opacity:.14}
+    .zone .tip{
+      position:absolute;left:16px;top:50%;transform:translateY(-50%);
+      padding:8px 10px;border-radius:12px;background:rgba(3,8,17,.95);border:1px solid var(--line);
+      font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:.18s ease
+    }
+    .zone:hover .tip{opacity:1}
+    .event{display:flex;gap:12px;padding:12px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid var(--line);margin-bottom:10px}
+    .event .event-icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-weight:700}
+    .event h4{margin:0 0 6px;font-size:14px}
+    .event p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
+    .event .time{color:#7991b2;font-size:12px;float:right}
+    .table{width:100%;border-collapse:separate;border-spacing:0 10px}
+    .table th{font-size:12px;color:#8fa6c5;text-align:left;font-weight:600;padding:0 12px}
+    .table td{padding:12px;background:rgba(255,255,255,.04);border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:14px}
+    .table tr td:first-child{border-left:1px solid var(--line);border-radius:12px 0 0 12px}
+    .table tr td:last-child{border-right:1px solid var(--line);border-radius:0 12px 12px 0}
+    .status{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;display:inline-block}
+    .s-ok{background:rgba(49,209,124,.15);color:#bdfad8}
+    .s-review{background:rgba(247,185,85,.15);color:#ffe4b6}
+    .s-risk{background:rgba(255,106,106,.15);color:#ffd5d5}
+    .footer{margin-top:20px;padding:16px 18px;border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.035);color:#a9bbd2;font-size:13px;line-height:1.65}
+    @media (max-width: 1200px){
+      .topbar{grid-template-columns:repeat(2,1fr)}
+      .grid-main,.grid-bottom{grid-template-columns:1fr}
+    }
+    @media (max-width: 680px){
+      .container{padding:16px}
+      .topbar{grid-template-columns:1fr}
+      .header{padding:16px;flex-direction:column;align-items:flex-start}
+      .brand h1{font-size:24px}
+      .chips{justify-content:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="header">
+      <div class="brand">
+        <h1>OMS Control Platform Demo</h1>
+        <p>জাতীয় OMS অপারেশন পর্যবেক্ষণ, সুবিধাভোগী যাচাইকরণ, ডুপ্লিকেট লিফট প্রতিরোধ, অফলাইন-ফার্স্ট সিঙ্ক এবং অডিট-ভিত্তিক প্রশাসনিক নজরদারির একটি ডেমো কন্ট্রোল টাওয়ার।</p>
+      </div>
+      <div class="chips">
+        <span class="chip cyan">Face-First Verification</span>
+        <span class="chip green">Offline-First Sync</span>
+        <span class="chip amber">Audit & Risk Signals</span>
+      </div>
+    </section>
+
+    <section class="topbar">
+      <div class="card">
+        <div class="stat-head">
+          <div>
+            <div class="label">আজকের লেনদেন</div>
+            <div class="value">27,140</div>
+            <div class="sub">গতকালের তুলনায় +5.1%</div>
+          </div>
+          <div class="icon cyan">↗</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stat-head">
+          <div>
+            <div class="label">যাচাইকৃত সুবিধাভোগী</div>
+            <div class="value">26,508</div>
+            <div class="sub">ফেস ভেরিফিকেশন সফল 97.7%</div>
+          </div>
+          <div class="icon green">✓</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stat-head">
+          <div>
+            <div class="label">ঝুঁকিপূর্ণ ইভেন্ট</div>
+            <div class="value">214</div>
+            <div class="sub">ডুপ্লিকেট / এক্সসেপশন / বিলম্বিত সিঙ্ক</div>
+          </div>
+          <div class="icon amber">!</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stat-head">
+          <div>
+            <div class="label">সিঙ্ক সাফল্য</div>
+            <div class="value">99.0%</div>
+            <div class="sub">অফলাইন কিউ রিকভার্ড 1,124</div>
+          </div>
+          <div class="icon red">⟳</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid-main">
+      <div class="card">
+        <div class="panel-title">
+          <div>
+            <h3>জাতীয় অপারেশন ট্রেন্ড</h3>
+            <p>দৈনিক লেনদেন ও সিঙ্ক স্বাস্থ্য পর্যবেক্ষণ</p>
+          </div>
+          <span class="badge cyan">লাইভ মনিটরিং</span>
+        </div>
+        <div class="chart-wrap">
+          <svg viewBox="0 0 760 310" preserveAspectRatio="none" aria-label="trend chart">
+            <defs>
+              <linearGradient id="fillTx" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#26c6da" stop-opacity="0.45"/>
+                <stop offset="100%" stop-color="#26c6da" stop-opacity="0.02"/>
+              </linearGradient>
+            </defs>
+            <g stroke="#17314f" stroke-width="1">
+              <line x1="44" y1="34" x2="44" y2="270" />
+              <line x1="44" y1="270" x2="720" y2="270" />
+              <line x1="44" y1="224" x2="720" y2="224" />
+              <line x1="44" y1="178" x2="720" y2="178" />
+              <line x1="44" y1="132" x2="720" y2="132" />
+              <line x1="44" y1="86" x2="720" y2="86" />
+            </g>
+            <g fill="#8ea7c6" font-size="11">
+              <text x="32" y="272">0</text>
+              <text x="14" y="226">10k</text>
+              <text x="14" y="180">15k</text>
+              <text x="14" y="134">20k</text>
+              <text x="14" y="88">25k</text>
+            </g>
+            <path d="M 70 112 L 170 101 L 270 79 L 370 58 L 470 69 L 570 46 L 670 34 L 670 270 L 70 270 Z" fill="url(#fillTx)"/>
+            <path d="M 70 112 L 170 101 L 270 79 L 370 58 L 470 69 L 570 46 L 670 34" fill="none" stroke="#26c6da" stroke-width="4" stroke-linecap="round"/>
+            <path d="M 70 128 L 170 136 L 270 119 L 370 110 L 470 119 L 570 110 L 670 110" fill="none" stroke="#31d17c" stroke-width="3" stroke-dasharray="5 5" stroke-linecap="round"/>
+            <g fill="#8ea7c6" font-size="12">
+              <text x="60" y="292">Sat</text>
+              <text x="160" y="292">Sun</text>
+              <text x="260" y="292">Mon</text>
+              <text x="360" y="292">Tue</text>
+              <text x="460" y="292">Wed</text>
+              <text x="560" y="292">Thu</text>
+              <text x="660" y="292">Fri</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="panel-title">
+          <div>
+            <h3>ডিলার ঝুঁকি বিভাজন</h3>
+            <p>স্বাস্থ্য, রিভিউ ও হাই-রিস্ক ক্যাটাগরি</p>
+          </div>
+          <span class="badge amber">AI Flags</span>
+        </div>
+        <div class="chart-wrap" style="height:250px">
+          <svg viewBox="0 0 320 250" preserveAspectRatio="xMidYMid meet">
+            <circle cx="160" cy="120" r="78" fill="none" stroke="#12324e" stroke-width="28"/>
+            <circle cx="160" cy="120" r="78" fill="none" stroke="#31d17c" stroke-width="28" stroke-dasharray="362 128" stroke-linecap="round" transform="rotate(-90 160 120)"/>
+            <circle cx="160" cy="120" r="78" fill="none" stroke="#f7b955" stroke-width="28" stroke-dasharray="88 402" stroke-dashoffset="-370" stroke-linecap="round" transform="rotate(-90 160 120)"/>
+            <circle cx="160" cy="120" r="78" fill="none" stroke="#ff6a6a" stroke-width="28" stroke-dasharray="39 451" stroke-dashoffset="-460" stroke-linecap="round" transform="rotate(-90 160 120)"/>
+            <text x="160" y="116" fill="#eef6ff" text-anchor="middle" style="font-size:38px;font-weight:800">74%</text>
+            <text x="160" y="142" fill="#8ea7c6" text-anchor="middle" style="font-size:12px">Healthy Dealers</text>
+          </svg>
+        </div>
+        <div class="legend">
+          <div class="mini"><span class="dot" style="background:#31d17c"></span><small>Healthy</small><strong>74%</strong></div>
+          <div class="mini"><span class="dot" style="background:#f7b955"></span><small>Review</small><strong>18%</strong></div>
+          <div class="mini"><span class="dot" style="background:#ff6a6a"></span><small>High Risk</small><strong>8%</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid-bottom">
+      <div class="card">
+        <div class="panel-title">
+          <div>
+            <h3>আঞ্চলিক চাহিদা বনাম ঝুঁকি</h3>
+            <p>পরবর্তী মাসের স্টক প্ল্যানিংয়ের জন্য অঞ্চলভিত্তিক সিগন্যাল</p>
+          </div>
+          <span class="badge green">Forecast Ready</span>
+        </div>
+        <div class="bar-row"><div>Dhaka</div><div class="bar-track"><div class="bar-fill cyan" style="width:92%"></div></div><div>92</div></div>
+        <div class="bar-row"><div>Chattogram</div><div class="bar-track"><div class="bar-fill cyan" style="width:84%"></div></div><div>84</div></div>
+        <div class="bar-row"><div>Rajshahi</div><div class="bar-track"><div class="bar-fill cyan" style="width:75%"></div></div><div>75</div></div>
+        <div class="bar-row"><div>Khulna</div><div class="bar-track"><div class="bar-fill cyan" style="width:67%"></div></div><div>67</div></div>
+        <div class="bar-row"><div>Rangpur</div><div class="bar-track"><div class="bar-fill cyan" style="width:80%"></div></div><div>80</div></div>
+        <div class="bar-row"><div>Sylhet</div><div class="bar-track"><div class="bar-fill cyan" style="width:61%"></div></div><div>61</div></div>
+        <hr style="border:none;border-top:1px solid var(--line);margin:16px 0">
+        <div class="bar-row"><div>Dhaka Risk</div><div class="bar-track"><div class="bar-fill amber" style="width:18%"></div></div><div>18</div></div>
+        <div class="bar-row"><div>Rangpur Risk</div><div class="bar-track"><div class="bar-fill amber" style="width:15%"></div></div><div>15</div></div>
+        <div class="bar-row"><div>Chattogram Risk</div><div class="bar-track"><div class="bar-fill amber" style="width:12%"></div></div><div>12</div></div>
+      </div>
+
+      <div class="card">
+        <div class="panel-title">
+          <div>
+            <h3>অপারেশন হিটম্যাপ</h3>
+            <p>দেশব্যাপী সেন্টার স্বাস্থ্য অবস্থান</p>
+          </div>
+          <span class="badge">8 Division Snapshot</span>
+        </div>
+        <div class="zone-map">
+          <div class="zone" style="left:22%;top:27%;color:#31d17c"><div class="pulse"></div><div class="tip"><strong>Dhaka North</strong><br>healthy</div></div>
+          <div class="zone" style="left:36%;top:22%;color:#f7b955"><div class="pulse"></div><div class="tip"><strong>Mymensingh</strong><br>review</div></div>
+          <div class="zone" style="left:58%;top:25%;color:#31d17c"><div class="pulse"></div><div class="tip"><strong>Sylhet</strong><br>healthy</div></div>
+          <div class="zone" style="left:16%;top:36%;color:#31d17c"><div class="pulse"></div><div class="tip"><strong>Rajshahi</strong><br>healthy</div></div>
+          <div class="zone" style="left:22%;top:16%;color:#ff6a6a"><div class="pulse"></div><div class="tip"><strong>Rangpur</strong><br>risk</div></div>
+          <div class="zone" style="left:18%;top:60%;color:#f7b955"><div class="pulse"></div><div class="tip"><strong>Khulna</strong><br>review</div></div>
+          <div class="zone" style="left:36%;top:66%;color:#31d17c"><div class="pulse"></div><div class="tip"><strong>Barishal</strong><br>healthy</div></div>
+          <div class="zone" style="left:66%;top:63%;color:#ff6a6a"><div class="pulse"></div><div class="tip"><strong>Chattogram</strong><br>risk</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="panel-title">
+          <div>
+            <h3>সাম্প্রতিক ইভেন্ট</h3>
+            <p>অডিট ও অ্যানোমালি ফিড</p>
+          </div>
+          <span class="badge red">Audit Live</span>
+        </div>
+        <div class="event"><div class="event-icon" style="background:rgba(49,209,124,.12);color:#bdfad8">✓</div><div><span class="time">09:12</span><h4>Distribution synced</h4><p>Dealer DLR-0234 • Beneficiary BEN-10021 • 5 kg rice</p></div></div>
+        <div class="event"><div class="event-icon" style="background:rgba(247,185,85,.12);color:#ffe6bf">!</div><div><span class="time">09:18</span><h4>Duplicate lift blocked</h4><p>BEN-10023 attempted second lift in same day</p></div></div>
+        <div class="event"><div class="event-icon" style="background:rgba(255,106,106,.12);color:#ffd1d1">⚠</div><div><span class="time">09:20</span><h4>Exception verification</h4><p>Low-light image retried and supervisor review created</p></div></div>
+        <div class="event"><div class="event-icon" style="background:rgba(38,198,218,.12);color:#bff6ff">⟳</div><div><span class="time">09:25</span><h4>Offline batch synced</h4><p>17 queued events acknowledged from Dhaka North OMS Circle</p></div></div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:18px">
+      <div class="panel-title">
+        <div>
+          <h3>সুবিধাভোগী স্ট্যাটাস স্ন্যাপশট</h3>
+          <p>ডেমো ডেটা — যোগ্যতা, কোটা ও যাচাইকরণ অবস্থা</p>
+        </div>
+        <span class="badge cyan">Field Queue Ready</span>
+      </div>
+      <table class="table">
+        <thead>
+          <tr><th>ID</th><th>নাম</th><th>কোটা</th><th>স্ট্যাটাস</th><th>ভেরিফিকেশন</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>BEN-10021</td><td>Amina Khatun</td><td>5 kg remaining</td><td><span class="status s-ok">Eligible</span></td><td><span class="status s-ok">Matched</span></td></tr>
+          <tr><td>BEN-10022</td><td>Abdul Karim</td><td>0 kg remaining</td><td><span class="status s-risk">Quota Exhausted</span></td><td><span class="status s-risk">Blocked</span></td></tr>
+          <tr><td>BEN-10023</td><td>Salma Begum</td><td>Already lifted today</td><td><span class="status s-review">Blocked Today</span></td><td><span class="status s-review">Review</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="footer">
+      <strong>Demo notes:</strong> এই ড্যাশবোর্ড ডেমোটি জাতীয় OMS কন্ট্রোল প্ল্যাটফর্মের একটি কনসেপ্ট। এতে ফিল্ড ট্রানজ্যাকশন, অফলাইন সিঙ্ক, আঞ্চলিক ঝুঁকি, অডিট ফিড এবং সুবিধাভোগী যাচাইকরণ-ভিত্তিক মনিটরিং এক জায়গায় দেখানো হয়েছে। ডেটা ডেমো-উদ্দেশ্যে প্রস্তুত।
+    </section>
+  </div>
+</body>
+</html>
